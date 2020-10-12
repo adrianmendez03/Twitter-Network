@@ -13,7 +13,7 @@ cur = conn.cursor()
 
 cur.execute(''' 
 CREATE TABLE IF NOT EXISTS Users
-    (id INTEGER PRIMARY KEY, url TEXT UNIQUE, following INTEGER, error INTEGER, old_rank REAL, new_rank REAL)
+    (id INTEGER PRIMARY KEY, username TEXT UNIQUE, url TEXT UNIQUE, following INTEGER, error INTEGER, old_rank REAL, new_rank REAL)
 ''')
 
 cur.execute('''
@@ -43,16 +43,16 @@ else:
 
     if(len(website) > 1):
         cur.execute("INSERT OR IGNORE INTO Websites (url) VALUES (?)", (website,))
-        cur.execute("INSERT OR IGNORE INTO Users (url, following, new_rank) VALUES (?, NULL, 1.0)", (starturl,))
+        cur.execute("INSERT OR IGNORE INTO Users (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, starturl,))
         conn.commit()
 
-# Get the current website
-cur.execute('''SELECT url FROM Websites''')
-websites = list()
+# Get the current user
+cur.execute('''SELECT url FROM Users''')
+users = list()
 for row in cur:
-    websites.append(str(row[0]))
+    users.append(str(row[0]))
 
-print(websites)
+print(users)
 
 many = 0
 while True:
@@ -62,18 +62,19 @@ while True:
         many = int(sval)
     many = many - 1
 
-    cur.execute('SELECT id, url FROM Users WHERE following is NULL and error is NULL ORDER BY RANDOM() LIMIT 1')
+    cur.execute('SELECT id, username, url FROM Users WHERE following is NULL and error is NULL ORDER BY RANDOM() LIMIT 1')
     try: 
         row = cur.fetchone()
         # Print row
         fromid = row[0]
-        url = row[1]
+        username = row[1]
+        url = row[2]
     except:
         print("No unretrieved users found")
         many = 0 
         break
 
-    print(fromid, url, end=" ")
+    print(fromid, username, url, end=" ")
 
     # If we are retrieving this page there should be no links from it
     cur.execute('DELETE from Links WHERE from_id=?', (fromid,))
@@ -93,7 +94,7 @@ while True:
 
         soup = BeautifulSoup(html, "html.parser")
         following = soup.findAll("span", ({"class" : "username"}))
-        following = following[1:]
+        following = following[1:4]
     except KeyboardInterrupt:
         print("")
         print("Program interrupted by user.")
@@ -104,14 +105,15 @@ while True:
         conn.commit()
         continue
 
-    cur.execute("INSERT OR IGNORE INTO Users (url, following, new_rank) VALUES (?, NULL, 1.0)", (url, ))
+    cur.execute("INSERT OR IGNORE INTO Users (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, url, ))
     cur.execute("UPDATE Users SET following=? WHERE url=?", (len(following), url))
     conn.commit()
 
     count = 0
     for user in following:
-        url = "https://mobile.twitter.com/" + user.contents[1] + "/following"
-        cur.execute("INSERT OR IGNORE INTO USERS (url, following, new_rank) VALUES (?, NULL, 1.0)", (url,))
+        username = user.contents[1]
+        url = "https://mobile.twitter.com/" + username + "/following"
+        cur.execute("INSERT OR IGNORE INTO USERS (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, url,))
         count += 1
         conn.commit()
 
