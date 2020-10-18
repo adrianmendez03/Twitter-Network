@@ -13,7 +13,7 @@ cur = conn.cursor()
 
 cur.execute(''' 
 CREATE TABLE IF NOT EXISTS Users
-    (id INTEGER PRIMARY KEY, username TEXT UNIQUE, url TEXT UNIQUE, following INTEGER, error INTEGER, old_rank REAL, new_rank REAL)
+    (id INTEGER PRIMARY KEY, username TEXT UNIQUE, following INTEGER)
 ''')
 
 cur.execute('''
@@ -27,7 +27,7 @@ cur.execute('''
 ''')
 
 # Check to see if we are already in progress ...
-cur.execute('SELECT id, url FROM Users WHERE following is NULL and error is NULL ORDER BY RANDOM() LIMIT 1')
+cur.execute('SELECT id FROM Users WHERE following is NULL ORDER BY RANDOM() LIMIT 1')
 row = cur.fetchone()
 if row is not None:
     print("Restarting existing crawl, Remove spider.sqlite to start a fresh crawl")
@@ -43,11 +43,11 @@ else:
 
     if(len(website) > 1):
         cur.execute("INSERT OR IGNORE INTO Websites (url) VALUES (?)", (website,))
-        cur.execute("INSERT OR IGNORE INTO Users (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, starturl,))
+        cur.execute("INSERT OR IGNORE INTO Users (username, following) VALUES (?, NULL)", (username,))
         conn.commit()
 
 # Get the current user
-cur.execute('''SELECT url FROM Users''')
+cur.execute('''SELECT id FROM Users''')
 users = list()
 for row in cur:
     users.append(str(row[0]))
@@ -62,69 +62,57 @@ while True:
         many = int(sval)
     many = many - 1
 
-    cur.execute('SELECT id, username, url FROM Users WHERE following is NULL and error is NULL ORDER BY RANDOM() LIMIT 1')
+    cur.execute('SELECT id, username FROM Users WHERE id<=20 and following is NULL ORDER BY RANDOM() LIMIT 1')
     try: 
         row = cur.fetchone()
-        # Print row
+        print(row)
         fromid = row[0]
         username = row[1]
-        url = row[2]
     except:
         print("No unretrieved users found")
         many = 0 
         break
 
-    print(fromid, username, url, end=" ")
+    print(fromid, username, end=" ")
 
     # If we are retrieving this page there should be no links from it
     cur.execute('DELETE from Links WHERE from_id=?', (fromid,))
     try:
-        document = urllib.request.urlopen(url, context=ctx)
+        document = urllib.request.urlopen("https://mobile.twitter.com/" + username + "/following", context=ctx)
 
         html = document.read()
-        if document.getcode() != 200:
-            print("Error on Page: ", document.getcode())
-            cur.execute('UPDATE Users SET error=? WHERE url=?', (document.getcode(), url))
-
-        if 'text/html' != document.info().get_content_type():
-            print("Ignore non text/html page")
-            cur.execute('DELETE FROM Users WHERE url=?', (url,))
-            conn.commit()
-            continue
 
         soup = BeautifulSoup(html, "html.parser")
         following = soup.findAll("span", ({"class" : "username"}))
-        following = following[1:4]
+        following = following[1:11]
     except KeyboardInterrupt:
         print("")
         print("Program interrupted by user.")
         break
     except:
         print("Unable to retrieve or parse page")
-        cur.execute("UPDATE Users SET error-=1 WHERE url=?", (url,))
-        conn.commit()
         continue
 
-    cur.execute("INSERT OR IGNORE INTO Users (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, url, ))
-    cur.execute("UPDATE Users SET following=? WHERE url=?", (len(following), url))
+    cur.execute("INSERT OR IGNORE INTO Users (username, following) VALUES (?, NULL)", (username, ))
+    cur.execute("UPDATE Users SET following=? WHERE id=?", (len(following), fromid))
     conn.commit()
 
     count = 0
     for user in following:
         username = user.contents[1]
         url = "https://mobile.twitter.com/" + username + "/following"
-        cur.execute("INSERT OR IGNORE INTO USERS (username, url, following, new_rank) VALUES (?, ?, NULL, 1.0)", (username, url,))
+        cur.execute("INSERT OR IGNORE INTO USERS (username, following) VALUES (?, NULL)", (username,))
         count += 1
         conn.commit()
 
-        cur.execute("SELECT id FROM Users WHERE url=? LIMIT 1", (url, ))
+        cur.execute("SELECT id FROM Users WHERE username=? LIMIT 1", (username, ))
         try: 
             row = cur.fetchone()
             toid = row[0]
         except:
             print("Could not retrieve id")
             continue
-        #print from id, to id
+        print(fromid, toid)
         cur.execute("INSERT OR IGNORE INTO Links (from_id, to_id) VALUES (?, ?)", ( fromid, toid ))
 
 cur.close()

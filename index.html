@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twitter Network</title>
+  <style>
+    .node {
+      fill: #ccc;
+      stroke: #fff;
+      stroke-width: 2px;
+    }
+    .link {
+      stroke: #777;
+      stroke-width: 1px;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://d3js.org/d3.v3.js"></script>
+  <script>
+
+    var width = 900;
+    var height = 700;
+
+    var links = [
+        {source: 1, target: 2}, 
+        {source: 1, target: 3}, 
+        {source: 1, target: 4}, 
+        {source: 1, target: 5}, 
+        {source: 1, target: 6}, 
+        {source: 1, target: 7}, 
+        {source: 1, target: 8}, 
+        {source: 1, target: 9}, 
+        {source: 1, target: 10}, 
+        {source: 1, target: 11}, 
+        {source: 11, target: 12}, 
+        {source: 11, target: 13}, 
+        {source: 11, target: 14}, 
+        {source: 11, target: 15}, 
+        {source: 11, target: 16}, 
+        {source: 11, target: 17}, 
+        {source: 11, target: 18}, 
+        {source: 11, target: 19}, 
+        {source: 11, target: 20}, 
+        {source: 11, target: 21}, 
+        {source: 14, target: 22}, 
+        {source: 14, target: 23}, 
+        {source: 14, target: 24}, 
+        {source: 14, target: 25}, 
+        {source: 14, target: 26}, 
+        {source: 14, target: 27}, 
+        {source: 14, target: 28}, 
+        {source: 14, target: 29}, 
+        {source: 14, target: 30}, 
+        {source: 14, target: 31}, 
+        {source: 17, target: 32}, 
+        {source: 17, target: 33}, 
+        {source: 17, target: 34}, 
+        {source: 17, target: 35}, 
+        {source: 17, target: 36}, 
+        {source: 17, target: 37}, 
+        {source: 17, target: 38}, 
+        {source: 17, target: 39}, 
+        {source: 17, target: 40}, 
+        {source: 17, target: 41}, 
+        {source: 9, target: 42}, 
+        {source: 9, target: 43}, 
+        {source: 9, target: 44}, 
+        {source: 9, target: 45}, 
+        {source: 9, target: 46}, 
+        {source: 9, target: 47}, 
+        {source: 9, target: 48}, 
+        {source: 9, target: 49}, 
+        {source: 9, target: 50}, 
+        {source: 9, target: 51}, 
+        {source: 5, target: 52}, 
+        {source: 5, target: 53}, 
+        {source: 5, target: 54}, 
+        {source: 5, target: 55}, 
+        {source: 5, target: 56}, 
+        {source: 5, target: 57}, 
+        {source: 5, target: 58}, 
+        {source: 5, target: 59}, 
+        {source: 5, target: 60}, 
+        {source: 5, target: 61}, 
+        {source: 15, target: 62}, 
+        {source: 15, target: 63}, 
+        {source: 15, target: 64}, 
+        {source: 15, target: 65}, 
+        {source: 15, target: 66}, 
+        {source: 15, target: 67}, 
+        {source: 15, target: 68}, 
+        {source: 15, target: 69}, 
+        {source: 15, target: 70}, 
+        {source: 15, target: 71}, 
+        {source: 16, target: 11}, 
+        {source: 16, target: 72}, 
+        {source: 16, target: 73}, 
+        {source: 16, target: 74}, 
+        {source: 16, target: 75}, 
+        {source: 16, target: 76}, 
+        {source: 16, target: 77}, 
+        {source: 16, target: 78}, 
+        {source: 16, target: 79}, 
+        {source: 16, target: 80}, 
+        {source: 19, target: 81}, 
+        {source: 2, target: 82}, 
+        {source: 2, target: 83}, 
+        {source: 2, target: 84}, 
+        {source: 2, target: 85}, 
+        {source: 2, target: 86}, 
+        {source: 2, target: 87}, 
+        {source: 2, target: 88}, 
+        {source: 2, target: 89}, 
+        {source: 2, target: 90}, 
+        {source: 2, target: 91}, 
+        {source: 8, target: 92}, 
+        {source: 8, target: 93}, 
+        {source: 8, target: 94}, 
+        {source: 8, target: 95}, 
+        {source: 8, target: 96}, 
+        {source: 8, target: 97}, 
+        {source: 8, target: 98}, 
+        {source: 8, target: 99}, 
+        {source: 8, target: 100}, 
+        {source: 8, target: 101}, 
+        {source: 18, target: 102}, 
+        {source: 18, target: 103}, 
+        {source: 18, target: 104}, 
+        {source: 18, target: 105}, 
+        {source: 18, target: 106}, 
+        {source: 18, target: 107}, 
+        {source: 18, target: 108}, 
+        {source: 18, target: 109}, 
+        {source: 18, target: 110}, 
+        {source: 18, target: 111}, 
+        {source: 7, target: 112}, 
+        {source: 7, target: 113}, 
+        {source: 7, target: 114}, 
+        {source: 7, target: 115}, 
+        {source: 7, target: 116}, 
+        {source: 7, target: 117}, 
+        {source: 7, target: 118}, 
+        {source: 7, target: 119}, 
+        {source: 7, target: 120}, 
+        {source: 7, target: 121}, 
+        {source: 12, target: 122}, 
+        {source: 12, target: 123}, 
+        {source: 12, target: 124}, 
+        {source: 12, target: 125}, 
+        {source: 12, target: 126}, 
+        {source: 12, target: 127}, 
+        {source: 12, target: 128}, 
+        {source: 12, target: 129}, 
+        {source: 12, target: 130}, 
+        {source: 12, target: 131}, 
+        {source: 6, target: 132}, 
+        {source: 6, target: 133}, 
+        {source: 6, target: 134}, 
+        {source: 6, target: 135}, 
+        {source: 6, target: 136}, 
+        {source: 6, target: 137}, 
+        {source: 6, target: 138}, 
+        {source: 6, target: 139}, 
+        {source: 6, target: 140}, 
+        {source: 6, target: 141}, 
+        {source: 10, target: 142}, 
+        {source: 10, target: 143}, 
+        {source: 10, target: 144}, 
+        {source: 10, target: 145}, 
+        {source: 10, target: 146}, 
+        {source: 10, target: 147}, 
+        {source: 10, target: 148}, 
+        {source: 10, target: 149}, 
+        {source: 10, target: 150}, 
+        {source: 10, target: 151}, 
+        {source: 4, target: 152}, 
+        {source: 4, target: 153}, 
+        {source: 4, target: 154}, 
+        {source: 4, target: 155}, 
+        {source: 4, target: 156}, 
+        {source: 4, target: 157}, 
+        {source: 4, target: 158}, 
+        {source: 4, target: 159}, 
+        {source: 4, target: 160}, 
+        {source: 4, target: 161}, 
+        {source: 3, target: 162}, 
+        {source: 3, target: 163}, 
+        {source: 3, target: 164}, 
+        {source: 3, target: 165}, 
+        {source: 3, target: 166}, 
+        {source: 3, target: 167}, 
+        {source: 3, target: 168}, 
+        {source: 3, target: 169}, 
+        {source: 3, target: 170}, 
+        {source: 3, target: 171}, 
+        {source: 13, target: 172}, 
+        {source: 13, target: 11}, 
+        {source: 13, target: 173}, 
+        {source: 13, target: 174}, 
+        {source: 13, target: 175}, 
+        {source: 13, target: 176}, 
+        {source: 13, target: 177}, 
+        {source: 13, target: 178}, 
+        {source: 13, target: 179}
+    ]
+
+    var nodes = [
+      {id: 1, username: "adrianmendez03", following: 10}, 
+      {id: 2, username: "shoe0nhead", following: 10}, 
+      {id: 3, username: "Big_Boss_Snake1", following: 10}, 
+      {id: 4, username: "MadameZuZus", following: 10}, 
+      {id: 5, username: "benawad", following: 10}, 
+      {id: 6, username: "kenklippenstein", following: 10}, 
+      {id: 7, username: "4aPeoplesParty", following: 10}, 
+      {id: 8, username: "VinMan17", following: 10}, 
+      {id: 9, username: "marcrebillet", following: 10}, 
+      {id: 10, username: "MJMcKean", following: 10}, 
+      {id: 11, username: "OkangRalph", following: 10}, 
+      {id: 12, username: "GiIvaSunner", following: 10}, 
+      {id: 13, username: "Baylor_H", following: 10}, 
+      {id: 14, username: "rugawdmusik", following: 10}, 
+      {id: 15, username: "Bubonto", following: 10}, 
+      {id: 16, username: "KuraJus", following: 10}, 
+      {id: 17, username: "karmicken", following: 10}, 
+      {id: 18, username: "maxmoefoe", following: 10}, 
+      {id: 19, username: "clowncoreWORLD", following: 1}, 
+      {id: 20, username: "AnimaIshits", following: 0}
+    ]
+
+    var nodes = {}
+
+    //parse  links to nodes 
+    links.forEach(function(link) {
+      link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+      link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+    })
+
+    var svg = d3.select('body').append('svg')
+      .attr('width', width)
+      .attr('height', height)
+
+    var force = d3.layout.force()
+      .size([width, height])
+      .nodes(d3.values(nodes))
+      .links(links)
+      .on('tick', tick)
+      .linkDistance(250)
+      .start();
+
+    var link = svg.selectAll('.link')
+      .data(links)
+      .enter().append('line')
+      .attr('class', 'link');
+
+    var node = svg.selectAll('.node')
+      .data(force.nodes())
+      .enter().append('circle')
+      .attr('class', 'node')
+      .attr('r', width / 125);
+
+  console.log(nodes)
+
+  function tick(e) {
+    node.attr('cx', function(d) { return d.x })
+      .attr('cy', function(d) { return d.y })
+      .call(force.drag);
+
+    link.attr('x1', function(d) { return d.source.x })
+      .attr('y1', function(d) { return d.source.y })
+      .attr('x2', function(d) { return d.target.x })
+      .attr('y2', function(d) { return d.target.y })
+  }
+    
+  </script>
+</body>
+</html>
